@@ -1,0 +1,69 @@
+{
+  "name": "WanderMood - Send Itinerary Email",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wondermood-send",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\nconst { email, moodName, moodEmoji, itinerary, preferences, tripId } = input;\n\nconst daysHtml = itinerary.days.map(day => {\n  const itemsHtml = day.items.map(item => \n    `<tr><td style=\"padding:8px 12px;color:#8B7355;font-weight:600;font-size:13px;width:80px;vertical-align:top;\">${item.time}</td><td style=\"padding:8px 12px;color:#4A4035;font-size:14px;\">${item.text}</td></tr>`\n  ).join('');\n  return `<div style=\"margin-bottom:24px;border:1px solid #E8E2D9;border-radius:16px;overflow:hidden;\"><div style=\"padding:16px 20px;background:#F9F7F4;border-bottom:1px solid #E8E2D9;\"><span style=\"font-size:12px;color:#8B7355;text-transform:uppercase;letter-spacing:0.05em;\">Day ${day.n}</span><h3 style=\"margin:4px 0 0;font-family:Georgia,serif;font-size:20px;color:#2C2520;\">${day.title}</h3></div><table style=\"width:100%;border-collapse:collapse;\">${itemsHtml}</table></div>`;\n}).join('');\n\nconst tipsHtml = itinerary.tips.map(tip => \n  `<div style=\"padding:12px 16px;border-left:3px solid #8B7355;margin-bottom:8px;background:#FDFCFA;\"><span style=\"font-size:14px;color:#4A4035;\">✦ ${tip}</span></div>`\n).join('');\n\nconst packingHtml = itinerary.packing.map(item => \n  `<span style=\"display:inline-block;padding:6px 14px;margin:4px;border-radius:999px;background:#F3EFE8;color:#4A4035;font-size:13px;\">${item}</span>`\n).join('');\n\nconst statsHtml = itinerary.stats.map(s => \n  `<td style=\"padding:16px;text-align:center;border-right:1px solid #E8E2D9;\"><div style=\"font-family:Georgia,serif;font-size:20px;color:#2C2520;\">${s.value}</div><div style=\"font-size:11px;color:#8B7355;text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;\">${s.label}</div></td>`\n).join('');\n\nconst htmlBody = `<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head><body style=\"margin:0;padding:0;background:#F9F7F4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;\"><div style=\"max-width:600px;margin:0 auto;padding:40px 20px;\"><div style=\"text-align:center;margin-bottom:40px;\"><h1 style=\"font-family:Georgia,serif;font-size:32px;color:#2C2520;margin:0;\">wander<em>mood</em></h1><p style=\"color:#8B7355;font-size:14px;margin-top:8px;\">Your trip is ready</p></div><div style=\"text-align:center;margin-bottom:32px;\"><span style=\"font-size:36px;\">${moodEmoji}</span><p style=\"font-size:14px;color:#8B7355;margin-top:8px;\">Mood: <strong>${moodName}</strong></p></div><div style=\"text-align:center;margin-bottom:32px;\"><h2 style=\"font-family:Georgia,serif;font-size:28px;color:#2C2520;margin:0 0 8px;\">${itinerary.title}</h2><p style=\"color:#6B5F52;font-size:15px;margin:0;\">📍 ${itinerary.place} · ${itinerary.range}</p></div><p style=\"font-family:Georgia,serif;font-size:18px;line-height:1.6;color:#4A4035;text-align:center;margin-bottom:32px;padding:0 20px;\">${itinerary.summary}</p><table style=\"width:100%;border-collapse:collapse;border:1px solid #E8E2D9;border-radius:12px;overflow:hidden;margin-bottom:32px;\"><tr>${statsHtml}</tr></table><h3 style=\"font-family:Georgia,serif;font-size:22px;color:#2C2520;margin-bottom:16px;\">Day by day</h3>${daysHtml}<h3 style=\"font-family:Georgia,serif;font-size:22px;color:#2C2520;margin:32px 0 16px;\">Good to know</h3>${tipsHtml}<h3 style=\"font-family:Georgia,serif;font-size:22px;color:#2C2520;margin:32px 0 16px;\">Pack light</h3><div style=\"margin-bottom:40px;\">${packingHtml}</div><div style=\"text-align:center;padding-top:32px;border-top:1px solid #E8E2D9;\"><p style=\"color:#8B7355;font-size:13px;\">Crafted with feeling by WanderMood</p></div></div></body></html>`;\n\nreturn [{ json: { to: email, subject: `${moodEmoji} Your ${moodName} trip: ${itinerary.title}`, html: htmlBody, tripId } }];"
+      },
+      "id": "format-email",
+      "name": "Format Email HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "hello@wandermood.app",
+        "toEmail": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "send-email",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [690, 300],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"success\": true, \"message\": \"Email sent\" }"
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [910, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Format Email HTML", "type": "main", "index": 0 }]]
+    },
+    "Format Email HTML": {
+      "main": [[{ "node": "Send Email", "type": "main", "index": 0 }]]
+    },
+    "Send Email": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

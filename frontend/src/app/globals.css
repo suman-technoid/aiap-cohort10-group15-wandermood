@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --serif: "Instrument Serif", Georgia, serif;
+  --sans: "Hanken Grotesk", -apple-system, system-ui, sans-serif;
+  --bg: oklch(0.16 0.008 70);
+  --bg-2: oklch(0.20 0.010 70);
+  --ink: oklch(0.96 0.006 80);
+  --ink-soft: oklch(0.80 0.008 80);
+  --ink-faint: oklch(0.64 0.010 80);
+  --line: oklch(0.98 0.01 80 / 0.12);
+  --line-soft: oklch(0.98 0.01 80 / 0.07);
+  --card: oklch(0.99 0.01 80 / 0.05);
+  --card-2: oklch(0.99 0.01 80 / 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background:
+    radial-gradient(120% 80% at 50% -10%, oklch(0.26 0.02 70) 0%, transparent 60%),
+    var(--bg);
+}
+
+::selection {
+  background: oklch(0.7 0.12 88 / 0.4);
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9000;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMDAnIGhlaWdodD0nMjAwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC44NScgbnVtT2N0YXZlcz0nMycgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNuKScvPjwvc3ZnPg==");
+}
+
+@keyframes wmFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes wmScaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes wmDrift {
+  0% { transform: translate3d(0,0,0) scale(1.05); }
+  100% { transform: translate3d(-2%, -1.5%, 0) scale(1.12); }
+}
+
+@keyframes wmBreathe {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+@keyframes wmShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes wmSpin {
+  to { transform: rotate(360deg); }
+}
