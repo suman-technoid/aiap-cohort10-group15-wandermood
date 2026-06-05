@@ -12,16 +12,17 @@ interface MoodConfirmProps {
   userName: string;
   onContinue: () => void;
   onBack: () => void;
+  onHome: () => void;
 }
 
-export function MoodConfirm({ mood, userName, onContinue, onBack }: MoodConfirmProps) {
+export function MoodConfirm({ mood, userName, onContinue, onBack, onHome }: MoodConfirmProps) {
   const c = moodColors(mood);
 
   return (
     <div className="min-h-[100dvh] relative">
       <Atmosphere mood={mood} />
       <Frame style={{ position: "relative", zIndex: 1 }}>
-        <TopBar onBack={onBack} />
+        <TopBar onBack={onBack} onLogoClick={onHome} />
 
         <div
           className="mt-16 flex flex-col items-center text-center"

@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callDeepSeek } from "@/lib/deepseek";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { moodId, moodName, moodFeels, moodGo, moodDoing, preferences } = body;
+    const { moodId, moodName, moodFeels, moodGo, moodDoing, preferences, existingTitles } = body;
 
     if (!moodId || !moodName || !preferences) {
       return NextResponse.json(
@@ -118,6 +122,10 @@ The JSON must match this exact structure:
 - Never generate fictional places or made-up restaurant names
 - Write in a warm, evocative tone — make the reader feel the trip`;
 
+    const avoidSection = existingTitles && existingTitles.length > 0
+      ? `\n\n## IMPORTANT: Avoid Duplicates\n\nDo NOT generate any of these trips (already shown to the user):\n${existingTitles.map((t: string) => `- "${t}"`).join("\n")}\n\nPick a DIFFERENT destination and title.`
+      : "";
+
     const userPrompt = `## Traveler's Selections
 
 - **Mood**: ${moodName} — "${moodFeels}"
@@ -129,7 +137,7 @@ The JSON must match this exact structure:
 ## Additional Context
 
 Destinations that match this mood: ${(moodGo || []).join(", ")}
-Activities this mood calls for: ${(moodDoing || []).join(", ")}
+Activities this mood calls for: ${(moodDoing || []).join(", ")}${avoidSection}
 
 ---
 
@@ -151,6 +159,30 @@ Generate a complete itinerary JSON for this traveler.`;
     // Validate required fields
     if (!itinerary.title || !itinerary.days || !Array.isArray(itinerary.days)) {
       throw new Error("Invalid itinerary structure from AI");
+    }
+
+    // Save generated itinerary to Supabase
+    try {
+      if (!supabaseUrl || supabaseUrl === "your-supabase-url-here") {
+        console.log("Supabase not configured, skipping save");
+      } else {
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        const { error: saveErr } = await supabase.from("trips").insert({
+          email: "",
+          mood_id: moodId,
+          mood_name: moodName,
+          preferences,
+          itinerary,
+          status: "pending",
+        });
+        if (saveErr) {
+          console.error("Supabase save error:", saveErr.message, saveErr.details, saveErr.hint);
+        } else {
+          console.log(">>> Itinerary saved to DB for mood:", moodId);
+        }
+      }
+    } catch (dbErr) {
+      console.error("Failed to save itinerary to DB:", dbErr);
     }
 
     return NextResponse.json({ success: true, itinerary });

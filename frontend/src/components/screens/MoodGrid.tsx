@@ -8,13 +8,14 @@ interface MoodGridProps {
   userName: string;
   onPick: (mood: Mood) => void;
   onBack: () => void;
+  onHome: () => void;
 }
 
-export function MoodGrid({ userName, onPick, onBack }: MoodGridProps) {
+export function MoodGrid({ userName, onPick, onBack, onHome }: MoodGridProps) {
   return (
     <div className="min-h-[100dvh]">
       <Frame>
-        <TopBar onBack={onBack} />
+        <TopBar onBack={onBack} onLogoClick={onHome} />
 
         <div className="mt-4 mb-6" style={{ animation: "wmFadeUp 0.5s ease both" }}>
           <h1

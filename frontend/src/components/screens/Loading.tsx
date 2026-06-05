@@ -34,45 +34,63 @@ export function Loading({ mood, beats, duration, onDone }: LoadingProps) {
 
   return (
     <div className="min-h-[100dvh] relative flex flex-col items-center justify-center">
-      <Atmosphere mood={mood} dim />
+      <Atmosphere mood={mood} />
 
       <div
         className="relative z-10 flex flex-col items-center text-center px-6"
         style={{ animation: "wmFadeUp 0.5s ease both" }}
       >
-        {/* Spinner */}
+        {/* Breathing mood orb with emoji — same as original prototype */}
         <div
-          className="w-12 h-12 rounded-full mb-8"
+          className="w-28 h-28 rounded-full mb-10 grid place-items-center"
           style={{
-            border: `2px solid oklch(0.98 0.01 80 / 0.15)`,
-            borderTopColor: c.bright,
-            animation: "wmSpin 1s linear infinite",
+            background: `conic-gradient(from 200deg, ${c.bright}, ${c.glow}, ${c.deep}, ${c.bright})`,
+            boxShadow: `0 0 60px ${c.glow}, 0 0 120px ${c.deep}`,
+            animation: "wmBreathe 3s ease-in-out infinite",
           }}
-        />
+        >
+          <span className="text-5xl">{mood.emoji}</span>
+        </div>
 
-        {/* Beat text */}
+        {/* Beat text — cycles with fade */}
         <p
           key={beatIdx}
-          className="text-lg"
+          className="text-[22px] leading-relaxed max-w-xs"
           style={{
             fontFamily: "var(--serif)",
-            color: "var(--ink-soft)",
-            animation: "wmFadeUp 0.4s ease both",
+            fontStyle: "italic",
+            color: "var(--ink)",
+            animation: "wmFadeUp 0.5s ease both",
           }}
         >
           {beats[beatIdx]}
         </p>
 
-        {/* Progress dots */}
-        <div className="flex gap-2 mt-8">
+        {/* Shimmer progress bar */}
+        <div
+          className="mt-10 w-48 h-[3px] rounded-full overflow-hidden"
+          style={{ background: "rgba(255,255,255,0.08)" }}
+        >
+          <div
+            className="h-full rounded-full"
+            style={{
+              background: `linear-gradient(90deg, transparent, ${c.bright}, transparent)`,
+              backgroundSize: "200% 100%",
+              animation: "wmShimmer 1.8s linear infinite",
+            }}
+          />
+        </div>
+
+        {/* Step dots */}
+        <div className="flex gap-2.5 mt-6">
           {beats.map((_, i) => (
             <div
               key={i}
-              className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+              className="rounded-full transition-all duration-500"
               style={{
-                background:
-                  i <= beatIdx ? c.bright : "oklch(0.98 0.01 80 / 0.2)",
-                transform: i === beatIdx ? "scale(1.4)" : "scale(1)",
+                width: i === beatIdx ? 20 : 6,
+                height: 6,
+                background: i <= beatIdx ? c.bright : "rgba(255,255,255,0.15)",
               }}
             />
           ))}

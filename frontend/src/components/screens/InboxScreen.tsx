@@ -14,9 +14,10 @@ interface InboxScreenProps {
   prefs: PrefsState;
   trip: Itinerary;
   onRestart: () => void;
+  onHome: () => void;
 }
 
-export function InboxScreen({ mood, userName, prefs, trip, onRestart }: InboxScreenProps) {
+export function InboxScreen({ mood, userName, prefs, trip, onRestart, onHome }: InboxScreenProps) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
@@ -73,7 +74,7 @@ export function InboxScreen({ mood, userName, prefs, trip, onRestart }: InboxScr
         <Atmosphere mood={mood} />
       </div>
       <Frame style={{ flex: 1, display: "flex", flexDirection: "column", position: "relative", zIndex: 1 }}>
-        <TopBar />
+        <TopBar onLogoClick={onHome} />
         <div className="flex-1 flex flex-col justify-center pb-12">
           {!sent ? (
             <div style={{ animation: "wmFadeUp .5s both" }}>

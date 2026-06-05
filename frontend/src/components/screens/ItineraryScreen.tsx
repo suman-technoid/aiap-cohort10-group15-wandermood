@@ -17,8 +17,12 @@ interface ItineraryScreenProps {
   tripIndex: number;
   tripTotal: number;
   onSwap: () => void;
+  onGenerateMore: () => void;
+  swapDisabled: boolean;
+  swapLoading: boolean;
   onSend: () => void;
   onBack: () => void;
+  onHome: () => void;
 }
 
 export function ItineraryScreen({
@@ -29,8 +33,12 @@ export function ItineraryScreen({
   tripIndex,
   tripTotal,
   onSwap,
+  onGenerateMore,
+  swapDisabled,
+  swapLoading,
   onSend,
   onBack,
+  onHome,
 }: ItineraryScreenProps) {
   const c = moodColors(mood);
 
@@ -42,6 +50,7 @@ export function ItineraryScreen({
         <Frame style={{ position: "relative", height: "100%", display: "flex", flexDirection: "column" }}>
           <TopBar
             onBack={onBack}
+            onLogoClick={onHome}
             right={
               <span className="text-[12.5px]" style={{ color: "var(--ink-soft)" }}>
                 Crafted for {userName}
@@ -101,31 +110,43 @@ export function ItineraryScreen({
           ))}
         </div>
 
-        {/* Swap trip */}
-        {tripTotal > 1 && (
-          <div
-            className="flex items-center justify-between gap-3 mt-3.5 flex-wrap"
-            style={{ animation: "wmFadeUp .5s both .12s" }}
-          >
-            <div className="flex items-center gap-[7px]">
-              {Array.from({ length: tripTotal }).map((_, i) => (
-                <span
-                  key={i}
-                  className="rounded-full transition-all duration-300"
-                  style={{
-                    width: i === tripIndex ? 18 : 6,
-                    height: 6,
-                    background: i === tripIndex ? c.bright : "oklch(0.98 0.01 80 / 0.2)",
-                  }}
-                />
-              ))}
-              <span className="text-[12.5px] ml-1.5" style={{ color: "var(--ink-faint)" }}>
-                Option {tripIndex + 1} of {tripTotal}
+        {/* Swap trip — show dots + button */}
+        <div
+          className="flex items-center justify-between gap-3 mt-3.5 flex-wrap"
+          style={{ animation: "wmFadeUp .5s both .12s" }}
+        >
+          <div className="flex items-center gap-[7px]">
+            {tripTotal > 1 ? (
+              <>
+                {Array.from({ length: tripTotal }).map((_, i) => (
+                  <span
+                    key={i}
+                    onClick={() => onSwap()}
+                    className="rounded-full transition-all duration-300 cursor-pointer"
+                    style={{
+                      width: i === tripIndex ? 18 : 6,
+                      height: 6,
+                      background: i === tripIndex ? c.bright : "oklch(0.98 0.01 80 / 0.2)",
+                    }}
+                  />
+                ))}
+                <span className="text-[12.5px] ml-1.5" style={{ color: "var(--ink-faint)" }}>
+                  Option {tripIndex + 1} of {tripTotal}
+                </span>
+              </>
+            ) : (
+              <span className="text-[12.5px]" style={{ color: "var(--ink-faint)" }}>
+                Your personalized trip
               </span>
-            </div>
-            <SwapBtn c={c} onClick={onSwap} label="Show me another" />
+            )}
           </div>
-        )}
+          <SwapBtn
+            c={c}
+            onClick={tripTotal > 1 ? onSwap : onGenerateMore}
+            label={swapLoading ? "Getting more options…" : (tripTotal > 1 && swapDisabled) ? "Next →" : "Show me another"}
+            disabled={swapLoading}
+          />
+        </div>
 
         <p
           className="text-[22px] leading-relaxed mt-6"
@@ -325,18 +346,21 @@ function DayCard({
   );
 }
 
-function SwapBtn({ c, onClick, label }: { c: ReturnType<typeof moodColors>; onClick: () => void; label: string }) {
+function SwapBtn({ c, onClick, label, disabled = false }: { c: ReturnType<typeof moodColors>; onClick: () => void; label: string; disabled?: boolean }) {
   const [h, setH] = useState(false);
   return (
     <button
       onClick={onClick}
       onMouseEnter={() => setH(true)}
       onMouseLeave={() => setH(false)}
+      disabled={disabled}
       className="inline-flex items-center gap-2 text-[13.5px] font-semibold px-4 py-2.5 rounded-full transition-transform"
       style={{
         border: `1px solid ${c.chipBorder}`,
         background: c.chipBg,
-        transform: h ? "translateY(-1px)" : "none",
+        transform: h && !disabled ? "translateY(-1px)" : "none",
+        opacity: disabled ? 0.4 : 1,
+        cursor: disabled ? "not-allowed" : "pointer",
       }}
     >
       <svg

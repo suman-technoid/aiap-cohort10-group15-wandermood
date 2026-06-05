@@ -60,6 +60,32 @@ body {
   100% { transform: translate3d(-2%, -1.5%, 0) scale(1.12); }
 }
 
+@keyframes wmMood1 {
+  0%, 16%  { opacity: 1; }
+  20%, 96% { opacity: 0; }
+  100%     { opacity: 1; }
+}
+@keyframes wmMood2 {
+  0%, 16%  { opacity: 0; }
+  20%, 36% { opacity: 1; }
+  40%, 100%{ opacity: 0; }
+}
+@keyframes wmMood3 {
+  0%, 36%  { opacity: 0; }
+  40%, 56% { opacity: 1; }
+  60%, 100%{ opacity: 0; }
+}
+@keyframes wmMood4 {
+  0%, 56%  { opacity: 0; }
+  60%, 76% { opacity: 1; }
+  80%, 100%{ opacity: 0; }
+}
+@keyframes wmMood5 {
+  0%, 76%  { opacity: 0; }
+  80%, 96% { opacity: 1; }
+  100%     { opacity: 0; }
+}
+
 @keyframes wmBreathe {
   0%, 100% { transform: scale(1); opacity: 0.9; }
   50% { transform: scale(1.06); opacity: 1; }

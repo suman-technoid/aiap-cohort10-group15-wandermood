@@ -27,24 +27,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Save to Supabase
+    // Save to Supabase — update existing trip (from generate) or create new
     const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
-    const { data: trip, error: dbError } = await supabase
+    // Try to find the pending trip without email (created during generation)
+    const { data: existingTrip } = await supabase
       .from("trips")
-      .insert({
-        email,
-        mood_id: moodId,
-        mood_name: moodName,
-        preferences,
-        itinerary,
-        status: "pending",
-      })
-      .select()
+      .select("id")
+      .eq("mood_id", moodId)
+      .eq("email", "")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1)
       .single();
 
-    if (dbError) {
-      console.error("Supabase insert error:", dbError);
+    let trip;
+    let dbError;
+
+    if (existingTrip) {
+      // Update the existing row with email
+      const result = await supabase
+        .from("trips")
+        .update({ email, itinerary, status: "pending" })
+        .eq("id", existingTrip.id)
+        .select()
+        .single();
+      trip = result.data;
+      dbError = result.error;
+    } else {
+      // Insert new row
+      const result = await supabase
+        .from("trips")
+        .insert({
+          email,
+          mood_id: moodId,
+          mood_name: moodName,
+          preferences,
+          itinerary,
+          status: "pending",
+        })
+        .select()
+        .single();
+      trip = result.data;
+      dbError = result.error;
+    }
+
+    if (dbError || !trip) {
+      console.error("Supabase error:", dbError);
       return NextResponse.json(
         { error: "Failed to save trip" },
         { status: 500 }

@@ -4,12 +4,13 @@ import { Wordmark } from "./Wordmark";
 
 interface TopBarProps {
   onBack?: () => void;
+  onLogoClick?: () => void;
   step?: number;
   total?: number;
   right?: React.ReactNode;
 }
 
-export function TopBar({ onBack, step, total, right }: TopBarProps) {
+export function TopBar({ onBack, onLogoClick, step, total, right }: TopBarProps) {
   return (
     <div className="flex items-center justify-between py-5 px-1 gap-3.5">
       <div className="flex items-center gap-3.5">
@@ -38,7 +39,9 @@ export function TopBar({ onBack, step, total, right }: TopBarProps) {
             </svg>
           </button>
         )}
-        <Wordmark size={19} />
+        <button onClick={onLogoClick} className="cursor-pointer" aria-label="Home">
+          <Wordmark size={19} />
+        </button>
       </div>
       {step != null && total != null ? (
         <Stepper step={step} total={total} />

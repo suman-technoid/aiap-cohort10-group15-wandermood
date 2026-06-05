@@ -20,6 +20,7 @@ interface PreferencesProps {
   setPrefs: (prefs: PrefsState) => void;
   onContinue: () => void;
   onBack: () => void;
+  onHome: () => void;
 }
 
 const BUDGET_OPTIONS = ["budget", "comfortable", "luxury"];
@@ -34,6 +35,7 @@ export function Preferences({
   setPrefs,
   onContinue,
   onBack,
+  onHome,
 }: PreferencesProps) {
   const c = moodColors(mood);
 
@@ -47,7 +49,7 @@ export function Preferences({
         <Atmosphere mood={mood} dim />
       </div>
       <Frame style={{ position: "relative", zIndex: 1 }}>
-        <TopBar onBack={onBack} />
+        <TopBar onBack={onBack} onLogoClick={onHome} />
 
         <div style={{ animation: "wmFadeUp 0.5s ease both" }}>
           <h1

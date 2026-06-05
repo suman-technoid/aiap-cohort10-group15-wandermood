@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Mood, SAMPLE_TRIP, moodColors } from "@/lib/data";
+import { Mood, moodColors } from "@/lib/data";
 import { Atmosphere } from "@/components/ui/Atmosphere";
 import { TopBar } from "@/components/ui/TopBar";
 import { Frame } from "@/components/ui/Frame";
+import { getTestimonialForMood, Testimonial } from "@/lib/testimonials";
 
 interface SampleTeaserProps {
   mood: Mood;
@@ -14,6 +15,7 @@ interface SampleTeaserProps {
   aiError: string | null;
   onDone: () => void;
   onBack: () => void;
+  onHome: () => void;
 }
 
 const FUNNY_MESSAGES = [
@@ -42,11 +44,40 @@ export function SampleTeaser({
   aiError,
   onDone,
   onBack,
+  onHome,
 }: SampleTeaserProps) {
   const c = moodColors(mood);
-  const t = SAMPLE_TRIP;
   const [msgIdx, setMsgIdx] = useState(0);
   const [minTimePassed, setMinTimePassed] = useState(false);
+  const [testimonial, setTestimonial] = useState<Testimonial>(
+    getTestimonialForMood(mood.id)
+  );
+
+  // Fetch mood-specific testimonial from DB (falls back to static)
+  useEffect(() => {
+    async function fetchTestimonial() {
+      try {
+        const res = await fetch(`/api/testimonials?mood=${mood.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.testimonial) {
+            setTestimonial({
+              mood_id: data.testimonial.mood_id,
+              traveler_name: data.testimonial.traveler_name,
+              trip_type: data.testimonial.trip_type,
+              quote: data.testimonial.quote,
+              trip_title: data.testimonial.trip_title,
+              place: data.testimonial.place,
+              stats: data.testimonial.stats,
+            });
+          }
+        }
+      } catch {
+        // Keep static fallback
+      }
+    }
+    fetchTestimonial();
+  }, [mood.id]);
 
   // Cycle through funny messages
   useEffect(() => {
@@ -79,7 +110,7 @@ export function SampleTeaser({
       {/* Main content */}
       <div className="flex-1 relative z-[1]">
         <Frame>
-          <TopBar onBack={onBack} />
+          <TopBar onBack={onBack} onLogoClick={onHome} />
 
           <div className="mt-8" style={{ animation: "wmFadeUp 0.6s ease both" }}>
             <div
@@ -93,7 +124,7 @@ export function SampleTeaser({
               className="text-[clamp(28px,7vw,40px)] leading-[1.05] tracking-tight mb-2"
               style={{ fontFamily: "var(--serif)", fontWeight: 400 }}
             >
-              {t.title}
+              {testimonial.trip_title}
             </h2>
 
             <p className="text-[13px] mb-6" style={{ color: "var(--ink-faint)" }}>
@@ -101,7 +132,7 @@ export function SampleTeaser({
             </p>
 
             <p className="text-[15px] mb-6" style={{ color: "var(--ink-soft)" }}>
-              📍 {t.place}
+              📍 {testimonial.place}
             </p>
 
             {/* Quote card */}
@@ -116,10 +147,10 @@ export function SampleTeaser({
                 className="text-[16.5px] italic leading-relaxed mb-4"
                 style={{ fontFamily: "var(--serif)" }}
               >
-                &ldquo;{t.traveler.quote}&rdquo;
+                &ldquo;{testimonial.quote}&rdquo;
               </p>
               <div className="text-[13px]" style={{ color: "var(--ink-faint)" }}>
-                — {t.traveler.name}, {t.traveler.type}
+                — {testimonial.traveler_name}, {testimonial.trip_type}
               </div>
             </div>
 
@@ -131,7 +162,7 @@ export function SampleTeaser({
                 border: "1px solid var(--line)",
               }}
             >
-              {t.stats.map((s) => (
+              {testimonial.stats.map((s) => (
                 <div
                   key={s.label}
                   className="py-4 px-2 text-center"
