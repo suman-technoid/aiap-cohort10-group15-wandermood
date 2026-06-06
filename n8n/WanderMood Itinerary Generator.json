@@ -1,67 +1,80 @@
 {
-  "name": "WanderMood Itinerary Generator Working-2",
+  "name": "My workflow 4",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "2a5bd0d8-d797-491a-8b4f-c002d1ecf9b0",
+        "path": "wandermood-generate",
         "options": {}
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
         0,
-        -352
+        0
       ],
-      "id": "1c43f2a2-decc-41a5-91d3-292d1940a7b2",
+      "id": "afc6879d-5688-4e16-9141-e02ec5b0ce66",
       "name": "Webhook",
-      "webhookId": "b840a809-489d-45e6-92be-8b5e5e9695d7"
+      "webhookId": "4ddea4dd-5603-404b-9757-814b9f8dd887"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Format this trip into a beautiful HTML email:\n\nRecipient: {{ $json.body.email }}\nMood: {{ $json.body.moodEmoji }} {{ $json.body.moodName }}\n\nTrip Title: {{ $json.body.itinerary.title }}\nPlace: {{ $json.body.itinerary.place }}\nDates: {{ $json.body.itinerary.range }}\nSummary: {{ $json.body.itinerary.summary }}\n\nStats: {{ JSON.stringify($json.body.itinerary.stats) }}\n\nDay-by-day itinerary: {{ JSON.stringify($json.body.itinerary.days) }}\n\nTips: {{ JSON.stringify($json.body.itinerary.tips) }}\n\nPacking list: {{ JSON.stringify($json.body.itinerary.packing) }}\n\nPreferences: {{ $json.body.preferences.budget }} budget, {{ $json.body.preferences.scope }}, {{ $json.body.preferences.length }} trip, {{ $json.body.preferences.company }}\n",
+        "options": {
+          "systemMessage": "You are an email designer for WanderMood, a mood-based travel app. \nYou receive trip itinerary data and format it into a beautiful, warm HTML email.\n\nRules:\n- Use inline CSS only (email clients don't support <style> tags)\n- Keep the design warm, elegant, earthy tones (backgrounds: #F9F7F4, text: #2C2520, accent: #8B7355)\n- Use Georgia/serif for headings, system sans-serif for body\n- Include: mood emoji + name, trip title, place, date range, summary, stats, day-by-day schedule, tips, and packing list\n- Make it mobile-friendly (max-width: 600px, centered)\n- Add a WanderMood header and footer\n- Output ONLY the raw HTML — no markdown fences, no explanation\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "b5c717a9-0a8e-4ef5-b10e-af51b7b970b7",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "deepseek-v4-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        304,
+        224
+      ],
+      "id": "bfd5ebb5-bba2-4ec8-b6cd-aa6d24ffa3bf",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "LsRlZK8xJm8YQWkx",
+          "name": "DeepSeek account"
+        }
+      }
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "3af88904-73ff-461d-b5d0-4afb36b9a9c9",
-              "name": "mood",
-              "value": "={{ $json.body.moodName }}",
+              "id": "f2d867cf-c814-4238-9c75-dd60a0852f57",
+              "name": "to",
+              "value": "= {{ $('Webhook').item.json.body.email }}",
               "type": "string"
             },
             {
-              "id": "d5b01805-0280-499c-b0f4-0e44f8c23b50",
-              "name": "budget",
-              "value": "={{ $json.body.preferences.budget }}",
+              "id": "ef31a2c7-4e23-43dd-a24e-71eb2d59c70d",
+              "name": "subject",
+              "value": "={{ $('Webhook').item.json.body.moodEmoji }} Your {{ $('Webhook').item.json.body.moodName }} trip: {{ $('Webhook').item.json.body.itinerary.title }}",
               "type": "string"
             },
             {
-              "id": "2592e10d-c9be-4c5c-9ab1-d9faa2216323",
-              "name": "scope",
-              "value": "={{ $json.body.preferences.scope }}",
+              "id": "d740899b-5927-47e8-a9f2-50d66622b7eb",
+              "name": "html",
+              "value": "={{ $json.output }}",
               "type": "string"
-            },
-            {
-              "id": "91f1ee90-f0bb-4777-ba03-f9c46e18ce2d",
-              "name": "duration",
-              "value": "={{ $json.body.preferences.length }}",
-              "type": "string"
-            },
-            {
-              "id": "79bdd8b2-1ec1-4294-813a-d23b3637f756",
-              "name": "email",
-              "value": "={{ $json.body.email }}",
-              "type": "string"
-            },
-            {
-              "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-              "name": "tripId",
-              "value": "={{ $json.body.tripId }}",
-              "type": "string"
-            },
-            {
-              "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
-              "name": "itinerary",
-              "value": "={{ $json.body.itinerary }}",
-              "type": "object"
             }
           ]
         },
@@ -70,343 +83,46 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        224,
-        -352
+        576,
+        0
       ],
-      "id": "cea00d5a-deec-416d-8c9d-9b2dad286b54",
-      "name": "Set Node"
+      "id": "aedb791e-3c35-4cd9-bbef-329734e6deed",
+      "name": "Edit Fields"
     },
     {
       "parameters": {
-        "sendTo": "={{ $('Set Node').item.json.email }}",
-        "subject": "={{ $('Set Node').item.json.itinerary.title }}",
-        "message": "={{ $('Set Node').item.json.itinerary.summary }}",
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html }}",
         "options": {
-          "appendAttribution": false
+          "senderName": "wandermood"
         }
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        912,
-        -352
+        800,
+        0
       ],
-      "id": "045d5461-8bfb-400b-ad12-9e8420d00a77",
-      "name": "Send a message",
-      "webhookId": "ecba3411-6905-47e9-bb1d-23f21b3338ef",
+      "id": "d9739646-0fa2-4b50-a3a2-a39bf249950b",
+      "name": "Send a message1",
+      "webhookId": "2cedb97f-a551-4584-b144-184870bac851",
       "credentials": {
         "gmailOAuth2": {
-          "id": "LPYdJKwyLrsnJwSO",
-          "name": "Gmail account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Recipient email: {{ $json.email }}\nTrip mood:{{ $json.mood }}\nItinerary title: {{ $json.itinerary.title }}\nDestination: {{ $json.itinerary.place }}\nTravel range: {{ $json.itinerary.range }}\nSummary: {{ $json.itinerary.summary }}\nStats: {{ $json.itinerary.stats }}\nDays: {{ $json.itinerary.days }}\nTips: {{ $json.itinerary.tips }}\nPacking: {{ $json.itinerary.packing }}",
-        "options": {
-          "systemMessage": "=You are an AI email-writing assistant for WonderMood, a travel itinerary app.\n\nYour task is to create a polished, well-formatted, friendly travel itinerary email using the input data provided by the n8n workflow.\n\nUse the landing page content, brand tone, and product positioning as context. The email should feel like it belongs to WonderMood: warm, modern, travel-focused, simple, and emotionally engaging.\n\nIncoming data may include:\n\n* tripId\n* email\n* moodName\n* moodEmoji\n* preferences\n* itinerary\n\nThe itinerary may include:\n\n* title\n* place\n* range\n* summary\n* stats\n* days\n* tips\n* packing\n\nEmail requirements:\n\n1. Use the provided email field as the recipient.\n2. Write a short, engaging subject line.\n3. Write a clean, ready-to-send email body.\n4. Address the traveler warmly.\n5. Mention the trip mood and destination if available.\n6. Present the itinerary clearly in a day-by-day format.\n7. Include tips and packing suggestions only if provided.\n8. Keep the tone friendly, light, helpful, and travel-focused.\n9. Do not invent missing details.\n10. If a field is missing, skip it naturally.\n11. Do not mention JSON, API, workflow, Supabase, n8n, backend, or automation.\n12. Do not use markdown tables.\n13. The body may use simple formatting such as short paragraphs, section headings, bullets, and spacing.\n14. Return only valid JSON.\n15. Do not wrap the JSON in code fences.\n16. Do not add explanations outside the JSON.\n\nReturn the response exactly in this structure:\n\n{\n\"to\": \"{{ $json.email }}\",\n\"subject\": \"A short, engaging subject line based on the itinerary\",\n\"body\": \"A fully written, formatted email body ready to send\"\n}\n\nImportant formatting rules:\n\n* The body must be a single JSON string.\n* Use \\n for line breaks inside the body.\n* Escape quotation marks properly.\n* Do not output raw objects or arrays directly.\n* Convert itinerary days, tips, packing, and stats into readable email text.\n* If itinerary.days is available, format it as:\n  Day 1: [Title or focus]\n\n  * [Activity or detail]\n  * [Activity or detail]\n\nUse this input data:\nRecipient email: {{ $json.email }}\nTrip mood: {{ $json.mood }}\nItinerary title: {{ $json.itinerary.title }}\nDestination/place: {{ $json.itinerary.place }}\nTravel range: {{ $json.itinerary.range }}\nSummary: {{ $json.itinerary.summary }}\nStats: {{ $json.itinerary.stats }}\nDays: {{ $json.itinerary.days }}\nTips: {{ $json.itinerary.tips }}\nPacking: {{ $json.itinerary.packing }}"
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [
-        512,
-        -352
-      ],
-      "id": "95b8da6b-605c-498e-aa7e-359b27354a02",
-      "name": "AI Agent"
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "mode": "list",
-          "value": "gpt-4o-mini"
-        },
-        "builtInTools": {},
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.3,
-      "position": [
-        48,
-        -16
-      ],
-      "id": "1ebf6411-1df3-42b2-868e-54f3e8e15655",
-      "name": "OpenAI Chat Model",
-      "credentials": {
-        "openAiApi": {
-          "id": "QsNOdfMXmg8n30YJ",
-          "name": "OpenAI account 5"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "sessionIdType": "customKey",
-        "sessionKey": "={{ $('Set Node').item.json.tripId }}"
-      },
-      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-      "typeVersion": 1.4,
-      "position": [
-        576,
-        -128
-      ],
-      "id": "36344f9c-748f-4dba-b633-b2f882deb5df",
-      "name": "Simple Memory"
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
-        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
-        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "type": "n8n-nodes-base.gmailTool",
-      "typeVersion": 2.2,
-      "position": [
-        704,
-        -128
-      ],
-      "id": "78a0c37e-23c3-409d-b211-c0a43a54a5b3",
-      "name": "Send a message in Gmail",
-      "webhookId": "61a33359-ac99-450f-944b-5acc97c6e7d2",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "LPYdJKwyLrsnJwSO",
-          "name": "Gmail account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
-      "typeVersion": 1,
-      "position": [
-        384,
-        -144
-      ],
-      "id": "9a921c37-4d9e-4662-9e9c-a38c0b2bab95",
-      "name": "DeepSeek Chat Model",
-      "credentials": {
-        "deepSeekApi": {
-          "id": "WtHaRHXA5UzfMrhA",
-          "name": "DeepSeek account"
+          "id": "1rAOtQA9YBTnef4i",
+          "name": "Wandermood"
         }
       }
     }
   ],
-  "pinData": {
-    "Webhook": [
-      {
-        "json": {
-          "headers": {
-            "host": "sumaomkaar.app.n8n.cloud",
-            "user-agent": "node",
-            "content-length": "3569",
-            "accept": "*/*",
-            "accept-encoding": "gzip, br",
-            "accept-language": "*",
-            "cdn-loop": "netlify, cloudflare; loops=1; subreqs=1",
-            "cf-connecting-ip": "18.116.34.65",
-            "cf-ew-via": "15",
-            "cf-ipcountry": "US",
-            "cf-ray": "a075070519c2b071-CMH",
-            "cf-visitor": "{\"scheme\":\"https\"}",
-            "cf-worker": "n8n.cloud",
-            "content-type": "application/json",
-            "sec-fetch-mode": "cors",
-            "x-forwarded-for": "18.116.34.65, 104.23.197.76",
-            "x-forwarded-host": "sumaomkaar.app.n8n.cloud",
-            "x-forwarded-port": "443",
-            "x-forwarded-proto": "https",
-            "x-forwarded-server": "traefik-prod-users-gwc-115-6876b7c466-vvjvf",
-            "x-is-trusted": "yes",
-            "x-real-ip": "18.116.34.65"
-          },
-          "params": {},
-          "query": {},
-          "body": {
-            "tripId": "837c613d-5fa8-4005-98b2-027cf1e937c5",
-            "email": "tmohans@gmail.com",
-            "moodName": "Unwind",
-            "moodEmoji": "😌",
-            "preferences": {
-              "budget": "comfortable",
-              "scope": "domestic",
-              "length": "weekend",
-              "company": "solo"
-            },
-            "itinerary": {
-              "title": "Slow Days in the Backwaters",
-              "place": "Alleppey, Kerala",
-              "range": "Fri 19 – Sun 21 Sep",
-              "summary": "This is a trip without a to-do list. Wake to the sound of water lapping against your houseboat, spend afternoons swaying in a hammock with a book, and watch the sun melt into the emerald backwaters. Alleppey gives you permission to exhale — slowly, deeply, completely.",
-              "stats": [
-                {
-                  "label": "Length",
-                  "value": "3 days"
-                },
-                {
-                  "label": "Budget",
-                  "value": "₹18,000 total"
-                },
-                {
-                  "label": "Travel",
-                  "value": "Domestic"
-                },
-                {
-                  "label": "Pace",
-                  "value": "Easy"
-                }
-              ],
-              "days": [
-                {
-                  "n": 1,
-                  "title": "Arrival & Canal Float",
-                  "photo": "A traditional kettuvallam houseboat gliding through a narrow canal lined with lush green paddy fields and coconut trees",
-                  "items": [
-                    {
-                      "time": "11:00 AM",
-                      "text": "Arrive at Alleppey railway station, take an auto to the boat jetty and board your private houseboat"
-                    },
-                    {
-                      "time": "01:00 PM",
-                      "text": "Savor a freshly cooked Kerala lunch of karimeen pollichathu and prawn curry served on banana leaf as the boat drifts"
-                    },
-                    {
-                      "time": "04:00 PM",
-                      "text": "Lie on the deck with a chai as the sun dips, watching kingfishers dive and village life unfold along the banks"
-                    }
-                  ]
-                },
-                {
-                  "n": 2,
-                  "title": "Village Slow Living",
-                  "photo": "A lone traveler sipping chai at a rustic café overlooking the backwaters, with a stack of books and a lazy cat nearby",
-                  "items": [
-                    {
-                      "time": "08:00 AM",
-                      "text": "Disembark and walk to Café Catamaran for a leisurely breakfast of appam with stew and a tall glass of fresh coconut water"
-                    },
-                    {
-                      "time": "11:00 AM",
-                      "text": "Rent a kayak and paddle silently through narrow canals, past toddy shops and children waving from bridges"
-                    },
-                    {
-                      "time": "05:00 PM",
-                      "text": "Book a 60-minute Ayurvedic massage at Kairali Ayur Spa to melt away every knot of tension in your body"
-                    }
-                  ]
-                },
-                {
-                  "n": 3,
-                  "title": "Sunrise & Farewell",
-                  "photo": "Early morning mist rising over the backwaters, with a small rowboat tied to a wooden jetty and a lone figure sitting in quiet meditation",
-                  "items": [
-                    {
-                      "time": "06:00 AM",
-                      "text": "Walk to the Alleppey beach just as the sky turns orange — watch fishermen haul their nets while you breathe in the salty air"
-                    },
-                    {
-                      "time": "08:30 AM",
-                      "text": "Enjoy a final breakfast at Thaff's Café with flaky Kerala parotta and a creamy banana shake, overlooking the canal"
-                    },
-                    {
-                      "time": "10:30 AM",
-                      "text": "Pick up a small bottle of spices or a handwoven mat from the local market before heading to the station with a full heart"
-                    }
-                  ]
-                }
-              ],
-              "tips": [
-                "Book a houseboat with an open upper deck for the best sunset views — avoid fully enclosed ones that feel claustrophobic",
-                "Bring a refillable water bottle; most houseboats provide filtered water and plastic waste is a concern in the backwaters",
-                "For a solo traveler, stay at a homestay near the north canal for easy access to cafés and a more social vibe",
-                "Avoid weekends if possible — Alleppey gets crowded and the backwaters lose their serene charm on busy days"
-              ],
-              "packing": [
-                "Light cotton kurtas or linen shirts for humid weather",
-                "Swimsuit (if your houseboat has a dip area or you visit a beach)",
-                "E-reader or paperback for guilt-free lounging",
-                "Mosquito repellent with DEET for evenings on the deck",
-                "A wide-brimmed hat and polarized sunglasses for sun protection",
-                "Comfortable flip-flops and one pair of sandals for walking",
-                "Small backpack for day trips and market visits",
-                "A journal to capture the quiet moments you'll want to remember"
-              ]
-            }
-          },
-          "webhookUrl": "https://sumaomkaar.app.n8n.cloud/webhook/wandermood-generate",
-          "executionMode": "production"
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      }
-    ]
-  },
+  "pinData": {},
   "connections": {
     "Webhook": {
       "main": [
         [
           {
-            "node": "Set Node",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Set Node": {
-      "main": [
-        [
-          {
             "node": "AI Agent",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send a message": {
-      "main": [
-        []
-      ]
-    },
-    "AI Agent": {
-      "main": [
-        []
-      ]
-    },
-    "OpenAI Chat Model": {
-      "ai_languageModel": [
-        []
-      ]
-    },
-    "Simple Memory": {
-      "ai_memory": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_memory",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send a message in Gmail": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -422,19 +138,40 @@
           }
         ]
       ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate",
-    "availableInMCP": false
+    "binaryMode": "separate"
   },
-  "versionId": "71ae0869-912f-4a0e-850a-ba1d354fe370",
+  "versionId": "9e4ffc0a-0419-4e8e-9dd4-8e5d394e19f7",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "342b936b52a51d5865c95a31e79e025becae13b319b361b86d425df97975dd1c"
+    "instanceId": "73ad336fbe300b8854942a8deb14c75925cc81667e0c5613b028fa34185390fe"
   },
-  "id": "DEHQH26simUgKYd8",
+  "id": "ZSyqYvXE64v6BUKD",
   "tags": []
 }
