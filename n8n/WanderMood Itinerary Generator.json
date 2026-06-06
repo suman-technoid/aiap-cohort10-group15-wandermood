@@ -102,29 +102,6 @@
     },
     {
       "parameters": {
-        "sendTo": "={{ $('Set Node').item.json.email }}",
-        "subject": "Your WanderMood Trip is Ready!",
-        "message": "HTML",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        832,
-        0
-      ],
-      "id": "4a7156e9-49af-49e5-8dd9-642b52134305",
-      "name": "Send a message",
-      "webhookId": "c73649a5-a7fd-45bc-993d-dcdb64d6db8d",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "73gsRx4yVkxyehWS",
-          "name": "Gmail account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
@@ -135,6 +112,29 @@
       ],
       "id": "5b05c36a-fff2-45ac-94d4-da1e80ecaf3e",
       "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Set Node').item.json.email }}",
+        "subject": "Your WanderMood Trip is Ready!",
+        "message": "=<div style=\"font-family:Arial,sans-serif;background:#0D0D1A;color:#fff;padding:24px;border-radius:12px\"> <h1 style=\"color:#FFD700\">🌍 Your WanderMood Itinerary</h1> <h2>✈️ Destination awaits you!</h2> <p><em>Travel by Mood, Not by Map!</em></p> <p><b>WanderMood, Group 15, OutSKILL Cohort 11</b></p> </div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        352
+      ],
+      "id": "ef583c1f-e107-46b1-9309-c0d9c3168124",
+      "name": "Send a message in Gmail",
+      "webhookId": "05e99e52-6216-4ecf-8a37-12e00dd11acb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73gsRx4yVkxyehWS",
+          "name": "Gmail account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -165,19 +165,19 @@
       "main": [
         [
           {
-            "node": "Send a message",
+            "node": "Respond to Webhook",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Send a message": {
-      "main": [
+    "Send a message in Gmail": {
+      "ai_tool": [
         [
           {
-            "node": "Respond to Webhook",
-            "type": "main",
+            "node": "Message a model",
+            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -189,7 +189,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "01c2941d-257e-4de4-930a-eb96f78d74b5",
+  "versionId": "3111894b-3e85-4a61-b5b8-673100ba6341",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "342b936b52a51d5865c95a31e79e025becae13b319b361b86d425df97975dd1c"
