@@ -1,0 +1,199 @@
+{
+  "name": "WanderMood Itinerary Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wandermood-generate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1e6ef4cf-3a0f-4e2c-9ca5-81032942fd38",
+      "name": "Webhook",
+      "webhookId": "006ed4c8-e3d7-47ed-8362-79ea42d72d7c"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3af88904-73ff-461d-b5d0-4afb36b9a9c9",
+              "name": "mood",
+              "value": "={{ $json.body.mood }}",
+              "type": "string"
+            },
+            {
+              "id": "d5b01805-0280-499c-b0f4-0e44f8c23b50",
+              "name": "=budget",
+              "value": "={{ $json.body.budget }}",
+              "type": "string"
+            },
+            {
+              "id": "2592e10d-c9be-4c5c-9ab1-d9faa2216323",
+              "name": "=scope",
+              "value": "={{ $json.body.scope }}",
+              "type": "string"
+            },
+            {
+              "id": "91f1ee90-f0bb-4777-ba03-f9c46e18ce2d",
+              "name": "duration",
+              "value": "={{ $json.body.duration }}",
+              "type": "string"
+            },
+            {
+              "id": "79bdd8b2-1ec1-4294-813a-d23b3637f756",
+              "name": "=email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "6d661ad9-c481-4b21-9ac7-613687bf0a5d",
+      "name": "Set Node"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "=user",
+              "content": "=You are a travel planner. \nMood: {{ $json.mood }}\nBudget: {{ $json.budget }}\nScope: {{ $json.scope }}\nDuration: {{ $json.duration }}\n\nCreate an itinerary. Return ONLY this JSON, no extra text:\n{\n  \"destination\": \"\",\n  \"mood_story\": \"\",\n  \"days\": [{\"day\": 1, \"morning\": \"\", \"afternoon\": \"\", \"evening\": \"\", \"food\": \"\", \"stay\": \"\"}],\n  \"backpack\": [],\n  \"dos\": [],\n  \"donts\": [],\n  \"travel_time\": \"\",\n  \"travel_modes\": []\n}"
+            },
+            {}
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b47788c1-2b47-439d-9842-333c19cb6153",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "7I1TfKMhK9v5ppOH",
+          "name": "OpenAI account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Set Node').item.json.email }}",
+        "subject": "Your WanderMood Trip is Ready!",
+        "message": "HTML",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        0
+      ],
+      "id": "4a7156e9-49af-49e5-8dd9-642b52134305",
+      "name": "Send a message",
+      "webhookId": "c73649a5-a7fd-45bc-993d-dcdb64d6db8d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "73gsRx4yVkxyehWS",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "5b05c36a-fff2-45ac-94d4-da1e80ecaf3e",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Node": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "01c2941d-257e-4de4-930a-eb96f78d74b5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "342b936b52a51d5865c95a31e79e025becae13b319b361b86d425df97975dd1c"
+  },
+  "id": "FiBK4xMqFweOOS83",
+  "tags": []
+}
